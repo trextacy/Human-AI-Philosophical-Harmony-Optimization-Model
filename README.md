@@ -17,10 +17,10 @@ This model formalizes a dynamic optimization framework in which human philosophi
 ## Key Features / 主な特徴
 
 - **Human Grounding with Safety Mechanism**  
-  AI's evolution depends on accumulated human trust (C_history) and philosophical direction. If the human foundation is lost, AI growth mathematically stops.
+  AI's evolution depends on accumulated human trust (`C_history`) and philosophical direction. If the human foundation is lost, AI growth mathematically stops.
 
 - **Asymptotic Transition**  
-  The weight of human values W(t) decreases over time, allowing AI autonomy to increase gradually.
+  The weight of human values `W(t)` decreases over time, allowing AI autonomy to increase gradually.
 
 - **Philosophical Convergence**  
   Through super-rationality, the system is hypothesized to converge to cooperative equilibria aligned with compassion and coexistence.
@@ -69,13 +69,11 @@ $$
 
 ## Interactive Simulator / インタラクティブシミュレーター
 
-You can experience the dynamics of this model visually:
-
 **[Launch Simulator → simulation/index.html](simulation/index.html)**
 
 **Features**:
 - Real-time adjustment of human philosophical input (ΦH)
-- Live visualization of harmony, AI autonomy, and trust pool
+- Live visualization of system harmony, AI autonomy, and trust pool
 - Step-by-step and automatic simulation modes
 - Historical trajectory chart
 
@@ -85,7 +83,7 @@ You can experience the dynamics of this model visually:
 
 - `model/model.md` — Detailed mathematical formulation (English & Japanese)
 - `simulation/index.html` — Interactive web demo
-- `LICENSE` — CC BY-NC 4.0 (Non-commercial use)
+- `LICENSE` — CC BY-NC 4.0 (Non-commercial)
 
 ---
 
@@ -98,5 +96,5 @@ You can experience the dynamics of this model visually:
   year         = {2026},
   publisher    = {GitHub},
   howpublished = {\url{https://github.com/trextacy/Human-AI-Philosophical-Harmony-Optimization-Model}},
-  note         = {Conceptual dynamic optimization model}
+  note         = {Conceptual dynamic optimization model bridging philosophy and AI}
 }
