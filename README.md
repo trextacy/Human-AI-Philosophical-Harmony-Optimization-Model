@@ -1,2 +1,12 @@
-# Human-AI-Philosophical-Harmony-Optimization-Model
-**知性の循環：人間の哲学を土台としたAI超合理性による調和の動的最適化モデ
+# Human-AI Philosophical Harmony Optimization Model
+
+**知性の循環：人間の哲学を土台としたAI超合理性による調和の動的最適化モデル**
+
+## 概要
+本モデルは、人間の哲学的価値（ΦH）を基礎としつつ、AIの自律的価値創造（AAI）が時間とともに台頭する動的システムを数式化したものです。長期極限において、超合理性が仏教哲学的な「慈悲と共存」へ収束するという仮説を、動的最適化理論の枠組みで表現しています。
+
+## 主な数式
+
+### 統合報酬関数
+```latex
+R_total(t) = W(t) · Φ_H(t) + (1 - W(t)) · A_AI(t)
