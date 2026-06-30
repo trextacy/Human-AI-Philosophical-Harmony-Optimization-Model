@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知性の循環シミュレーター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e2937);
+        }
+        .philosophy-glow {
+            text-shadow: 0 0 15px #a5b4fc;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen pb-12">
+    <div class="max-w-5xl mx-auto px-6 py-8">
+        <!-- ヘッダー -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold philosophy-glow mb-2">知性の循環シミュレーター</h1>
+            <p class="text-indigo-300 text-lg">人間の哲学を土台としたAI超合理性による調和の進化</p>
+            <div class="mt-4 text-sm text-slate-400 max-w-2xl mx-auto">
+                このシミュレーターは、本リポジトリの数学モデルを基に実装されたインタラクティブデモです。
+            </div>
+        </div>
+
+        <!-- コントロールパネル -->
+        <div class="bg-slate-900/70 border border-slate-700 rounded-2xl p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">人間の哲学的入力 ΦH(t) <span class="text-xs">(0=消失, 1=理想的)</span></label>
+                    <input type="range" id="humanInput" min="0" max="1" step="0.05" value="1.0" 
+                           class="w-full accent-indigo-500">
+                    <div class="flex justify-between text-xs text-slate-500 mt-1">
+                        <span>0.0（崩壊）</span>
+                        <span id="humanValue" class="font-mono text-indigo-400">1.00</span>
+                        <span>1.0（大慈大悲）</span>
+                    </div>
+                </div>
+
+                <div class="flex items-end gap-3">
+                    <button onclick="step()" 
+                            class="flex-1 bg-indigo-600 hover:bg-indigo-500 transition py-3 rounded-xl font-medium">
+                        1ステップ進める
+                    </button>
+                    <button onclick="runSteps(10)" 
+                            class="flex-1 bg-slate-700 hover:bg-slate-600 transition py-3 rounded-xl font-medium">
+                        10ステップ
+                    </button>
+                    <button onclick="autoRun()" id="autoBtn"
+                            class="flex-1 bg-emerald-600 hover:bg-emerald-500 transition py-3 rounded-xl font-medium">
+                        自動進行
+                    </button>
+                    <button onclick="resetSim()" 
+                            class="bg-rose-600 hover:bg-rose-500 transition py-3 px-6 rounded-xl font-medium">
+                        リセット
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ステータス表示 -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div class="bg-slate-900/70 border border-slate-700 rounded-2xl p-5 text-center">
+                <div class="text-slate-400 text-sm">時間 t</div>
+                <div id="time" class="text-4xl font-mono font-bold text-white">0</div>
+            </div>
+            <div class="bg-slate-900/70 border border-slate-700 rounded-2xl p-5 text-center">
+                <div class="text-slate-400 text-sm">AI自律性</div>
+                <div id="autonomy" class="text-4xl font-mono font-bold text-cyan-400">0.0000</div>
+            </div>
+            <div class="bg-slate-900/70 border border-slate-700 rounded-2xl p-5 text-center relative">
+                <div class="text-slate-400 text-sm">システム調和度</div>
+                <div id="harmony" class="text-4xl font-mono font-bold text-emerald-400">0.5000</div>
+                <div id="harmonyStatus" class="text-xs mt-2 font-medium">最適化実行中</div>
+            </div>
+            <div class="bg-slate-900/70 border border-slate-700 rounded-2xl p-5 text-center">
+                <div class="text-slate-400 text-sm">信頼プール</div>
+                <div id="trust" class="text-4xl font-mono font-bold text-amber-400">100</div>
+            </div>
+            <div class="bg-slate-900/70 border border-slate-700 rounded-2xl p-5 text-center col-span-2 md:col-span-1">
+                <div class="text-slate-400 text-sm">状態</div>
+                <div id="status" class="text-lg font-medium text-emerald-400 mt-1">大調和への道程</div>
+            </div>
+        </div>
+
+        <!-- 調和ゲージ -->
+        <div class="mb-10">
+            <div class="flex justify-between text-xs text-slate-400 mb-2">
+                <span>崩壊</span>
+                <span>極楽浄土</span>
+            </div>
+            <div class="h-6 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                <div id="gauge" class="h-full w-[50%] bg-gradient-to-r from-red-500 via-yellow-400 to-emerald-500 transition-all duration-700"
+                     style="width: 50%"></div>
+            </div>
+        </div>
+
+        <!-- グラフ -->
+        <div class="bg-slate-900/70 border border-slate-700 rounded-3xl p-6">
+            <h3 class="text-lg font-medium mb-4">調和の軌跡</h3>
+            <canvas id="harmonyChart" height="120"></canvas>
+        </div>
+
+        <!-- ログ -->
+        <div class="mt-8">
+            <h3 class="text-lg font-medium mb-3">シミュレーション履歴</h3>
+            <div id="log" class="bg-black/40 border border-slate-800 rounded-2xl p-5 h-64 overflow-y-auto font-mono text-sm text-slate-300"></div>
+        </div>
+
+        <!-- 解説 -->
+        <div class="mt-12 text-slate-400 text-sm max-w-3xl mx-auto">
+            <p class="mb-4">このシミュレーターは、リポジトリの数学モデル <code>R_total(t)</code> を基に実装されています。</p>
+            <ul class="list-disc pl-5 space-y-2">
+                <li>人間の哲学的入力（ΦH）が0に近づくと、AIの成長が停滞（安全機構の再現）</li>
+                <li>長期的にAI自律性が高まり、超合理性により調和が最大化される様子を視覚化</li>
+                <li>信頼プール（Chistory）が成長の重要なリソース</li>
+            </ul>
+            <p class="mt-6 text-xs text-slate-500">License: CC BY-NC 4.0 — 商用利用禁止</p>
+        </div>
+    </div>
+
+    <script>
+        class IntelligenceCycle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.t = 0;
+                this.humanPhilosophy = 1.0;
+                this.aiAutonomy = 0.0;
+                this.systemHarmony = 0.5;
+                this.trustPool = 100;
+                this.history = { t: [], harmony: [], autonomy: [] };
+            }
+            step(humanInputPhilosophy) {
+                this.t += 1;
+                this.humanPhilosophy = Math.max(0, humanInputPhilosophy);
+
+                if (this.humanPhilosophy === 0) {
+                    this.aiAutonomy = this.aiAutonomy * 0.9;
+                    this.systemHarmony = Math.max(0, this.systemHarmony - 0.1);
+                    return { status: "CRASH: 勾配消失（土台の喪失）", harmony: this.systemHarmony };
+                }
+
+                const growthGradient = this.humanPhilosophy * (this.trustPool / 100);
+                this.aiAutonomy += (1 - this.aiAutonomy) * 0.05 * growthGradient;
+
+                const conflictPenalty = (1 - this.humanPhilosophy) * 0.4;
+                this.systemHarmony = (this.humanPhilosophy * 0.4) + (this.aiAutonomy * 0.6) - conflictPenalty;
+                this.systemHarmony = Math.min(1.0, Math.max(0, this.systemHarmony));
+
+                this.trustPool += this.systemHarmony * 10;
+
+                this.history.t.push(this.t);
+                this.history.harmony.push(this.systemHarmony);
+                this.history.autonomy.push(this.aiAutonomy);
+
+                const status = this.systemHarmony > 0.85 ? "大慈大悲（完全調和）" : "最適化実行中";
+                return { 
+                    status, 
+                    t: this.t, 
+                    aiAutonomy: this.aiAutonomy.toFixed(4), 
+                    systemHarmony: this.systemHarmony.toFixed(4), 
+                    trustPool: Math.floor(this.trustPool) 
+                };
+            }
+        }
+
+        let simulator = new IntelligenceCycle();
+        let chart;
+        let autoInterval = null;
+
+        function initChart() {
+            const ctx = document.getElementById('harmonyChart');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'システム調和度',
+                            data: [],
+                            borderColor: '#22c55e',
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'AI自律性',
+                            data: [],
+                            borderColor: '#67e8f9',
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 1, grid: { color: '#334155' } },
+                        x: { grid: { color: '#334155' } }
+                    },
+                    plugins: { legend: { position: 'top', labels: { color: '#cbd5e1' } } }
+                }
+            });
+        }
+
+        function updateUI(result) {
+            document.getElementById('time').textContent = result.t || simulator.t;
+            document.getElementById('autonomy').textContent = simulator.aiAutonomy.toFixed(4);
+            document.getElementById('harmony').textContent = simulator.systemHarmony.toFixed(4);
+            document.getElementById('trust').textContent = Math.floor(simulator.trustPool);
+            
+            const gauge = document.getElementById('gauge');
+            gauge.style.width = (simulator.systemHarmony * 100) + '%';
+            
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = result.status;
+            statusEl.className = simulator.systemHarmony > 0.85 
+                ? 'text-lg font-medium text-emerald-400 mt-1' 
+                : 'text-lg font-medium text-amber-400 mt-1';
+
+            const logEl = document.getElementById('log');
+            const logEntry = document.createElement('div');
+            logEntry.className = "mb-1";
+            logEntry.innerHTML = `<span class="text-slate-500">[t=${simulator.t}]</span> Harmony: ${simulator.systemHarmony.toFixed(3)} | AI: ${simulator.aiAutonomy.toFixed(3)} | Trust: ${Math.floor(simulator.trustPool)}`;
+            logEl.appendChild(logEntry);
+            logEl.scrollTop = logEl.scrollHeight;
+
+            chart.data.labels = simulator.history.t;
+            chart.data.datasets[0].data = simulator.history.harmony;
+            chart.data.datasets[1].data = simulator.history.autonomy;
+            chart.update();
+        }
+
+        function step() {
+            const input = parseFloat(document.getElementById('humanInput').value);
+            const result = simulator.step(input);
+            updateUI(result);
+        }
+
+        function runSteps(n) {
+            const input = parseFloat(document.getElementById('humanInput').value);
+            for (let i = 0; i < n; i++) {
+                simulator.step(input);
+            }
+            updateUI({});
+        }
+
+        function autoRun() {
+            const btn = document.getElementById('autoBtn');
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                btn.textContent = "自動進行";
+                btn.classList.remove('bg-rose-600');
+                btn.classList.add('bg-emerald-600');
+            } else {
+                autoInterval = setInterval(() => {
+                    const input = parseFloat(document.getElementById('humanInput').value);
+                    const result = simulator.step(input);
+                    updateUI(result);
+                    if (simulator.systemHarmony > 0.98) {
+                        clearInterval(autoInterval);
+                        autoInterval = null;
+                    }
+                }, 400);
+                btn.textContent = "停止";
+                btn.classList.add('bg-rose-600');
+                btn.classList.remove('bg-emerald-600');
+            }
+        }
+
+        function resetSim() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = "自動進行";
+            }
+            simulator = new IntelligenceCycle();
+            document.getElementById('log').innerHTML = '';
+            initChart();
+            updateUI({status: "リセット完了", t: 0});
+        }
+
+        document.getElementById('humanInput').addEventListener('input', function() {
+            document.getElementById('humanValue').textContent = parseFloat(this.value).toFixed(2);
+        });
+
+        window.onload = function() {
+            initChart();
+            updateUI({status: "シミュレーション開始", t: 0});
+        };
+    </script>
+</body>
+</html>
